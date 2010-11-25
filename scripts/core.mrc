@@ -48,9 +48,12 @@ alias core {
       .msg $2 !!updatechans
       updatechans $me
     }
-    if ($2 == $dev || $2 == #gerty) { haltdef | return }
-
-    ; load up data from database
+    if ($2 == $dev || $2 == #gerty) {
+      ctcpcommand $me $_JOIN_ $2
+      _queue .ctcp $!dev(%) $_JOIN_ $2 $nick($2, 0)
+      haltdef
+      return
+    }
 
     var %min $iif($hget($2, users), $v1, 5)
     if ($nick($2, 0) >= %min) {
