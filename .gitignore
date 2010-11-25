@@ -1,0 +1,9 @@
+
+logs/*
+mirc.exe
+servers.ini
+remote.ini
+mirc.ini
+gerty.db
+botData/geupdate.txt
+botData/errors.ini
