@@ -18,6 +18,8 @@ raw 473:*:          core $_NOJOIN_ $2-
 raw 474:*:          core $_NOJOIN_ $2-
 raw 475:*:          core $_NOJOIN_ $2-
 raw 477:*:          core $_NOJOIN_ $2-
+raw 352:*:          haltdef
+raw 315:*:          haltdef
 
 
 alias core {
@@ -25,7 +27,10 @@ alias core {
     goto $1
 
     :1 _START_
-
+    // initialize timer
+    if (!$timer(Core)) {
+      .timerCore 0 1 timerCall
+    }
     _queue core
     return
 
@@ -51,21 +56,23 @@ alias core {
     if ($2 == $dev || $2 == #gerty) {
       ctcpcommand $me $_JOIN_ $2
       _queue .ctcp $!dev(%) $_JOIN_ $2 $nick($2, 0)
+      opush core.jobs who $2
       haltdef
       return
     }
 
     var %min $iif($hget($2, users), $v1, 5)
-    if ($nick($2, 0) >= %min) {
+    if ($userCount($2) >= %min) {
       ctcpcommand $me $_JOIN_ $2
-      _queue .ctcp $!dev(%) $_JOIN_ $2 $nick($2, 0)
+      _queue .ctcp $!dev(%) $_JOIN_ $2 $userCount($2)
     }
     else {
-      .msg $2 You do not have enough users to invite me. (07 $+ $nick($2, 0) $+ / $+ %min users.).
+      .msg $2 You do not have enough users to invite me. (07 $+ $userCount($2) $+ / $+ %min users.).
       part $2 Contact an admin in #gerty with any questions.
       _warning join channel $2 below user req
     }
-
+    ; add who chan to jobs
+    opush core.jobs who $2
     haltdef
     return
 

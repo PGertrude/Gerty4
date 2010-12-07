@@ -1,5 +1,6 @@
 versions.aliases return 4.0
 
+// constants
 [             return $([,)
 ]             return $(],)
 {             return $({,)
@@ -26,6 +27,7 @@ _NOJOIN_      return 11
 _RAW_         return 12
 _CHANLIST_    return 13
 
+// macros
 dev           return $iif($1,$1) $+ #gertyDev
 errFile       return $mircdirbotData\errors.ini
 geFile        return $mircdirbotData\geupdate.txt
@@ -37,6 +39,17 @@ admins        return P_Gertrude;Tiedemanns; $+ $config(data, admins)
 main          return $iif($hget(core, main) == $cid, $true, $false)
 thread        return $+(a,$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9))
 
+// job handling
+timerCall {
+  var %time $gmt
+  if ($calc(%time % 10) == 0) { // get job from core.
+    if ($isObj($oparse(core.jobs))) {
+      if ($oshift(core.jobs)) [ [ $v1 ] ]
+    }
+  }
+}
+
+// aliases
 isAdmin {
   if ( $1 isop $dev || $1 ishop $dev ) { return $true }
   if ($fingerprint($1) isin $hget(core, admins)) { return $true }
@@ -55,6 +68,43 @@ getSource {
   noop $com($2, open, 1, bstr, get, bstr, %url, bool, 0)
   noop $comcall($2, noop $!com($1, responseText, 2) $(|,) $1 $!com($1).result $(|,) .comclose $!1, send, 1)
 }
+loadChannel {
+  var %sql SELECT * FROM channel WHERE `channel`LIKE" $+ $1 $+ ";
+  var %query $sqlite_query(1, %sql)
+  while ($sqlite_fetch_row(%query, row, $SQLITE_ASSOC)) {
+    hadd -m $hget(row, channel) users $hget(row, users)
+    hadd -m $hget(row, channel) blacklist $hget(row, blacklist)
+    hadd -m $hget(row, channel) public $hget(row, public)
+    hadd -m $hget(row, channel) site $hget(row, site)
+    hadd -m $hget(row, channel) event $hget(row, event)
+    var %objName $hget(row, channel), %values $hget(row, setting), %x 1
+    tokenize 59 %values
+    while (%x <= $0) {
+      hadd -m %objName $gettok($($ $+ %x,2),1,58) $gettok($($ $+ %x,2),2,58)
+      inc %x
+    }
+  }
+  if ($hget(row)) { hfree row }
+}
+isBot {
+  if ($istok(BanHammer Captain_Falcon ClanWars Client Coder Machine milk Minibar mIRC Noobs Q RSHelp RuneScape snoozles Spam SwiftIRC Unknown W Warcraft X Y ChanServ,$1,32)) { return $true }
+  if ($regex($1,/^(\[..\]BigSister|(\[..\])?Gerty|(\[..\])?RuneScript|Vectra(\[..\])?|Impact(\[..\])?|(\[..\])?Carbon|iKick|Miley-Cyrus)$/Si)) { return $true }
+  if ($regex($1,/^(Noobwegian|Onzichtbaar(\[..\])?|ChanStat(\-..)?|ChaosTrivia(\[..\])?|Overflow|PokemonBot(\[..\])?)$/Si)) { return $true }
+  return $false
+}
+userCount {
+  if ($left($1, 1) == $#) {
+    var %x $nick($1, 0), %i 1, %n 0
+    while (%i <= %x) {
+      if (!$isBot($nick($1, %i))) inc %n
+      inc %i
+    }
+    return %n
+  }
+}
+
+
+// object references
 oadd {
   if ($0 <= 1) { _fatalError oadd Insufficient Parameters. }
   if ($0 == 2) { tokenize 32 $1- $false }
@@ -99,11 +149,13 @@ odel {
 opush {
   var %val $2-
   var %obj $oparse($1)
-  if (!%obj) { oadd $replace($1, $chr(46), $chr(32)) 1 $2- }
-  else {
-    if (!$isObj(%obj)) _fatalError opush Object operation on non-object
-    hadd -m %obj $calc($hget(%obj, 0).item +1) $2-
+  if (!%obj) {
+    oadd $replace($1, $chr(46), $chr(32)) 1 1
+    %obj = $oparse($1)
+    ofree %obj 1
   }
+  if (!$isObj(%obj)) _fatalError opush Object operation on non-object
+  hadd -m %obj $calc($hget(%obj, 0).item +1) $2-
 }
 oreindex {
   var %obj $oparse($1)
@@ -154,22 +206,4 @@ oisin {
     inc %x
   }
   return $false
-}
-loadChannel {
-  var %sql SELECT * FROM channel WHERE `channel`LIKE" $+ $1 $+ ";
-  var %query $sqlite_query(1, %sql)
-  while ($sqlite_fetch_row(%query, row, $SQLITE_ASSOC)) {
-    hadd -m $hget(row, channel) users $hget(row, users)
-    hadd -m $hget(row, channel) blacklist $hget(row, blacklist)
-    hadd -m $hget(row, channel) public $hget(row, public)
-    hadd -m $hget(row, channel) site $hget(row, site)
-    hadd -m $hget(row, channel) event $hget(row, event)
-    var %objName $hget(row, channel), %values $hget(row, setting), %x 1
-    tokenize 59 %values
-    while (%x <= $0) {
-      hadd -m %objName $gettok($($ $+ %x,2),1,58) $gettok($($ $+ %x,2),2,58)
-      inc %x
-    }
-  }
-  if ($hget(row)) { hfree row }
 }
