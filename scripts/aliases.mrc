@@ -39,12 +39,19 @@ admins        return P_Gertrude;Tiedemanns; $+ $config(data, admins)
 main          return $iif($hget(core, main) == $cid, $true, $false)
 thread        return $+(a,$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9))
 
-// job handling
+// job handling - common to all servers!
 timerCall {
   var %time $gmt
   if ($calc(%time % 10) == 0) { // get job from core.
     if ($isObj($oparse(core.jobs))) {
       if ($oshift(core.jobs)) [ [ $v1 ] ]
+    }
+    var %x 0
+    while (%x <= $scon(0)) {
+      if (!$scid($scon(%x)).server) {
+        ; scon %x server ; commented out for session limit kills!
+      }
+      inc %x
     }
   }
 }
