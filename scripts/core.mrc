@@ -4,7 +4,7 @@ on *:START:         core $_START_
 on *:CONNECT:       core $_CONNECT_
 on *:QUIT:          core $_QUIT_ $nick
 on *:DISCONNECT:    core $_DISCONNECT_
-on *:JOIN:*:        if (# == $dev && $nick == $me) ofree $oparse(core.channels)
+on *:JOIN:*:        if (# == $dev && $nick == $me) ofree $$$(core).channels
 on *:PART:*:        core $_PART_ # $nick
 on *:KICK:*:        core $_PART_ # $me
 on *:MODE:*:        core $_MODE_ #
@@ -34,7 +34,7 @@ alias core {
     _queue core
     return
 
-    :2 _CONNECTED_
+    :2 _CONNECT_
     if (swiftirc isin $server) {
       ns id $config(conn, ircpass)
       join $config(conn, channel)
@@ -96,14 +96,14 @@ alias core {
 
     ; is this channel allowed us?
     loadChannel $2
-    if ($oparse($2 $+ .blacklist) == 1) {
+    if ($$$($2).blacklist == 1) {
       _queue core $_NOJOIN_ $2 Cannot join channel (blacklisted)
       if ($hget($2)) { hfree $2 }
       return
     }
 
     ; Find bot with least users.
-    var %botlist $oparse(core.channels)
+    var %botlist $$$(core).channels
     var %bots $hget(%botlist, 0).item
     var %x 1, %bot, %channels, %EmptyBot $me, %EmptyChannels $chan(0)
     while (%x <= %bots) {
@@ -122,7 +122,7 @@ alias core {
 
     return
 
-    :10 nick in use
+    :10 _NICKINUSE_
     var %nicks $config(data, botNicks)
     if ($numtok(%nicks, 59) < 2) _fatalError core out of nicks
     else nick $gettok(%nicks, $calc($findtok(%nicks, $2, 59) +1), 59)

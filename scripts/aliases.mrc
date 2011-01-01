@@ -7,7 +7,6 @@ versions.aliases return 4.0
 }             return $(},)
 |             return $(|,)
 %             return $(%,)
-$             return $($,)
 #             return $(#,)
 
 _START_       return 1
@@ -57,6 +56,9 @@ timerCall {
 }
 
 // aliases
+$ {
+  return $oparse($1 $+ . $+ $prop)
+}
 isAdmin {
   if ( $1 isop $dev || $1 ishop $dev ) { return $true }
   if ($fingerprint($1) isin $hget(core, admins)) { return $true }
