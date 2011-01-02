@@ -11,7 +11,7 @@ calculator {
 }
 ScanString {
   var %string $1, %index 1, %newString, %strLen $len(%string), %char, %lastChar, %calcId $iif($2, $2, $thread)
-  if (!$2) { oadd %calcId solve $false }
+  if (!$2) { oadd %calcId solve $false | oadd %calcId recursions 1 }
   echo -a %string : %strLen
   while (%index <= %strLen) {
     %char = $mid(%string, %index, 1)
@@ -37,7 +37,7 @@ ScanString {
         dec %i
         %lastChar = $mid(%string, %i, 1)
       }
-      if (!$isOperator(%lastChar)) {
+      if (!$isOperator(%lastChar) && %lastChar && %lastChar !isin $chr(40) $+ [) {
         %newString = %newString $+ *
       }
       %newString = %newString $+ %char
@@ -62,14 +62,14 @@ ScanString {
             inc %index
             break
           }
-          elseif (%char == x && $isOperator(%lastChar)) { ; add x if x appears as an unknown (not in the middle of a function name or argument.)
+          elseif (%char == x && ($isOperator(%lastChar) || !%lastChar || %lastChar isin $chr(40) $+ $chr(41) $+ ][)) { ; add x if x appears as an unknown (not in the middle of a function name or argument.)
             %newString = %newString $+ x
             %isFunc = $false
             inc %index
             break
           }
           elseif (%char == x) {
-            echo -a escaping through overflow!
+            echo -a escaping through overflow! : %index
             %newString = %newString $+ x
             %isFunc = $false
             inc %index
@@ -129,9 +129,16 @@ ScanString {
     }
     %lastChar = %char
   }
-  return %newString
+  hinc %calcId recursions -1
+  if ($$$(%calcId).recursions == 0) {
+    echo -a %string > %newString
+  }
+  else {
+    return %newString
+  }
 }
 recurseScan {
+  hinc $2 recursions
   return $scanString($1, $2)
 }
 isOperator {
