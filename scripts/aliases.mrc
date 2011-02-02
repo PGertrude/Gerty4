@@ -216,3 +216,32 @@ oisin {
   }
   return $false
 }
+ocreate {
+  if ($0 == 1) hmake $1
+  if ($0 == 2) {
+    if ($hget($1, $2)) { return }
+    var %thread $+(${, $thread, $})
+    hadd -m $1 $2 %thread
+    hmake %thread
+  }
+}
+
+// databases
+db_query {
+  var %resultId $thread
+  var %query $sqlite_query(1, $1)
+  oadd %resultId rows $sqlite_num_rows(%query)
+  ocreate %resultId results
+  var %y 1
+  while ($sqlite_fetch_row(%query, row, $SQLITE_ASSOC)) {
+    var %x 1
+    while (%x <= $hget(row, 0).item) {
+      ocreate $$$(%resultId).results %y
+      hadd $$$(%resultId).results. [ $+ [ %y ] ] $hget(row, %x).item $hget(row, $hget(row, %x).item)
+      inc %x
+    }
+    inc %y
+  }
+  hfree row
+  return %resultId
+}
