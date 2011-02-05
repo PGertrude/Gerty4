@@ -40,11 +40,11 @@ ScanString {
       if (!$isOperator(%lastChar) && %lastChar && %lastChar !isin $chr(40) $+ [) {
         %newString = %newString $+ *
       }
-      %newString = %newString $+ %char
+      %newString = %newString $+ (
       inc %index
     }
     elseif (%char isin ] $+ $chr(41)) { ; add brackets to the string
-      %newString = %newString $+ %char
+      %newString = %newString $+ )
       inc %index
     }
     elseif (%char isletter) { ; add functions and skills to the string

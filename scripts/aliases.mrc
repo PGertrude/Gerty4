@@ -57,7 +57,16 @@ timerCall {
 
 // aliases
 $ {
-  return $oparse($1 $+ . $+ $prop)
+  if ($prop) { return $oparse($1 $+ . $+ $prop) }
+  return $oparse($1)
+}
+echo {
+  if ($1 == -a || $1 == -s) { tokenize 32 $2- }
+  if ($chr(36) isin $1-) {
+    echo -st $($1-,1) => $($1-, 2)
+    return
+  }
+  echo -at $1-
 }
 isAdmin {
   if ( $1 isop $dev || $1 ishop $dev ) { return $true }
@@ -149,6 +158,13 @@ ofree {
     hdel $1 $hget($1, %x).item
   }
   hfree $1
+  if ($isObj(core.objects)) {
+    var %index $oisin(core.objects, $1)
+    if (%index) { 
+      hdel $$$(core.objects) %index
+      oreindex core.objects
+    }
+  }
 }
 odel {
   var %obj $oparse($1), %child $2
@@ -231,6 +247,7 @@ db_query {
   var %resultId $thread
   var %query $sqlite_query(1, $1)
   oadd %resultId rows $sqlite_num_rows(%query)
+  oadd %resultId creationTime $gmt
   ocreate %resultId results
   var %y 1
   while ($sqlite_fetch_row(%query, row, $SQLITE_ASSOC)) {
@@ -242,6 +259,8 @@ db_query {
     }
     inc %y
   }
-  hfree row
+  if ($hget(row)) { hfree row }
+  if (!$isObj($oparse(core.objects))) { ocreate core objects }
+  opush core.objects %resultId
   return %resultId
 }
