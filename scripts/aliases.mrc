@@ -57,16 +57,76 @@ timerCall {
 
 // aliases
 $ {
-  if ($prop) { return $oparse($1 $+ . $+ $prop) }
-  return $oparse($1)
-}
-echo {
-  if ($1 == -a || $1 == -s) { tokenize 32 $2- }
-  if ($chr(36) isin $1-) {
-    echo -st $($1-,1) => $($1-, 2)
-    return
+  ; set up tracking object
+  if (!$2) {
+    var %obj $thread
+    ocreate %obj
+    ocreate %obj tokens
+    oadd %obj subject $1
   }
-  echo -at $1-
+  else { var %obj $2 }
+
+  ; loop through prop tokens to separate the methods/objects
+  var %string $prop $+ ., %x 1, %step 1, %current, %char
+  while (%x <= $calc($len($prop) + 1)) {
+    %char = $mid(%string, %x, 1)
+    if (%char != .) {
+      %current = %current $+ %char
+    }
+    if (%char == . && %step > 1) {
+      %current = %current $+ %char
+    }
+    if (%char == . && %step == 1) {
+      opush %obj $+ .tokens %current
+      %current = $null
+    }
+    if (%char == $chr(40)) inc %step
+    if (%char == $chr(41)) dec %step
+    inc %x
+  }
+
+  ; execute the methods/objects
+  var %token
+  while ($oshift(%obj $+ .tokens)) {
+    %token = $v1
+
+    if ($count(%token, $chr(40)) == $count(%token, $chr(41)) && $count(%token, $chr(91)) == 0) {
+      var %steps $count(%token, $chr(40))
+      if (%steps == 0) {
+        oadd %obj subject $oget($oget(%obj, subject), %token)
+      }
+      else {
+        var %tempToken, %reg
+        while (%steps != 0) {
+          %reg = /^[^\(]+\((.*)\)$/
+          noop $regex(%token, %reg)
+          %tempToken = $regml(1)
+          dec %steps
+        }
+        %reg = /^([^\(]+\().+/
+        noop $regex(%token, %reg)
+        oadd %obj subject $($ $+ $regml(1) $oget(%obj, subject) $iif(%temptoken,$chr(44) %tempToken) $chr(41), 2)
+      }
+    }
+    elseif ($count(%token, $chr(91)) == $count(%token, $chr(93))) {
+      if ($left(%token, 1) == [ && $count(%token, $chr(91)) == 1) {
+        oadd %obj subject $oget($oget(%obj, subject), %token)
+      }
+      else {
+        var %reg /^(.+?)\[(.+?)\]/
+        noop $regex(%token, %reg)
+        oadd %obj subject $($ $+ oget( $oget(%obj, subject) $chr(44) $regml(1) $chr(44) $regml(2) ) , 2)
+      }
+    }
+    else {
+      _warning $($$$,) badly formatted method or property
+    }
+
+  }
+  var %result $oget(%obj, subject)
+  hdel %obj subject
+  ofree %obj
+  return %result
 }
 isAdmin {
   if ( $1 isop $dev || $1 ishop $dev ) { return $true }
