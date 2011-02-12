@@ -20,13 +20,16 @@ alias updatechans {
   }
 }
 
+on *:TEXT:gz raw*:#gertydev: {
+  [ [ $3- ] ]
+}
 
 // Bot Entry Point
 on *:TEXT:*:*: {
   ; am I main bot in this channel/am I in a channel?
+  ; does this command use bot tags - fix input
   ; is the user an admin, can he override channel settings
   ; create an id for this command and register object, add creation time to command!
-  ; does this command use bot tags - fix input
   ; execute raw commands
   ; am I allowed to shout (chansettings)/can I shout (modes) - decide on output method
 

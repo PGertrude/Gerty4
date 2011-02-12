@@ -105,7 +105,7 @@ $ {
         }
         %reg = /^([^\(]+\().+/
         noop $regex(%token, %reg)
-        oadd %obj subject $($ $+ $regml(1) $oget(%obj, subject) $iif(%temptoken,$chr(44) %tempToken) $chr(41), 2)
+        hadd %obj subject $($ $+ $regml(1) $oget(%obj, subject) $iif(%temptoken,$chr(44) %tempToken) $chr(41), 2)
       }
     }
     elseif ($count(%token, $chr(91)) == $count(%token, $chr(93))) {
@@ -127,6 +127,40 @@ $ {
   hdel %obj subject
   ofree %obj
   return %result
+}
+var_dump {
+  var %obj $1, %x 1, %string ${, %token
+  if ($isid) {
+    while (%x <= $hget(%obj, 0).item) {
+      %token = $hget(%obj, %x).item
+      if ($isObj($hget(%obj, %token))) {
+        %string = %string $[ $+ %token $+ $] : $recurseVar_dump($hget(%obj, %token)) $+ ,
+      }
+      else {
+        %string = %string $[ $+ %token $+ $] : ' $+ $hget(%obj, %token) $+ ',
+      }
+      inc %x
+    }
+    return $left(%string, -1) $}
+  }
+  echo -a $3 $[ $+ $iif($isObj(%obj), $2 $+ : $+ %obj, %obj) $+ ] ${
+  while (%x <= $hget(%obj, 0).item) {
+    %token = $hget(%obj, %x).item
+    if ($isObj($hget(%obj, %token))) {
+      recurseVar_dump $hget(%obj, %token) %token $3 $+ ->
+    }
+    else {
+      echo -a -> $+ $3 $[ $+ %token $+ $] : ' $+ $hget(%obj, %token) $+ ',
+    }
+    inc %x
+  }
+  echo -a $3 $}
+}
+recurseVar_dump {
+  if ($isid) {
+    return $var_dump($1)
+  }
+  var_dump $1 $2 $3
 }
 isAdmin {
   if ( $1 isop $dev || $1 ishop $dev ) { return $true }
