@@ -68,7 +68,7 @@ $ {
 
   ; loop through prop tokens to separate the methods/objects
   var %string $prop $+ ., %x 1, %step 1, %current, %char
-  while (%x <= $calc($len($prop) + 1)) {
+  while ($prop && %x <= $calc($len($prop) + 1)) {
     %char = $mid(%string, %x, 1)
     if (%char != .) {
       %current = %current $+ %char
@@ -83,6 +83,9 @@ $ {
     if (%char == $chr(40)) inc %step
     if (%char == $chr(41)) dec %step
     inc %x
+  }
+  if (!$prop) {
+    opush %obj $+ .tokens oparse()
   }
 
   ; execute the methods/objects
@@ -123,14 +126,16 @@ $ {
     }
 
   }
+
   var %result $oget(%obj, subject)
   hdel %obj subject
   ofree %obj
-  return %result
+  return $iif(%result, $v1, $false)
 }
 var_dump {
   var %obj $1, %x 1, %string ${, %token
   if ($isid) {
+    if ($isObj($oparse($1))) %obj = $oparse($1)
     while (%x <= $hget(%obj, 0).item) {
       %token = $hget(%obj, %x).item
       if ($isObj($hget(%obj, %token))) {
