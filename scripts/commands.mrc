@@ -26,10 +26,20 @@ on *:TEXT:gz raw*:#gertydev: {
 
 // Bot Entry Point
 on *:TEXT:*:*: {
+  ; create an id for this command and register object, add creation time to command!
+  var %command $thread
+  oadd %command time $gmt
+
   ; am I main bot in this channel/am I in a channel?
+  if (#) {
+    var %users $nick(#, 0), %i 1
+    while (%i <= %users) {
+      if (!$oisin(core.botList, $nick(#, %i)) || $$$(core.botList. $+ $me) > $$$(core.botList. $+ $nick(#, %i))) goto cleanup
+      inc %i
+    }
+  }
   ; does this command use bot tags - fix input
   ; is the user an admin, can he override channel settings
-  ; create an id for this command and register object, add creation time to command!
   ; execute raw commands
   ; am I allowed to shout (chansettings)/can I shout (modes) - decide on output method
 
@@ -38,4 +48,5 @@ on *:TEXT:*:*: {
   ; non-commands - check for calculation
 
   ; clean up after command
+  :cleanup
 }
