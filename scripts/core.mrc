@@ -27,9 +27,14 @@ alias core {
     goto $1
 
     :1 _START_
-    // initialize timer
+    ; initialize timer
     if (!$timer(Core)) {
       .timerCore 0 1 timerCall
+    }
+    var %bots $config(data, botNicks), %i 1
+    while (%i <= $numtok(%bots, 59)) {
+      oadd core botList $gettok(%bots, %i, 59) %i
+      inc %i
     }
     _queue core
     return
