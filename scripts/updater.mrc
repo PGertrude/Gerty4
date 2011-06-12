@@ -21,7 +21,12 @@ on *:sockread:findupdate: {
     !bwrite %file -1 -1 $bvar(&versions, %a, $bvar(&versions,0)).text
   }
   !.load -rs %file
-  checkVersions
+  if ($isalias(checkVersions)) {
+    checkVersions
+  }
+  else {
+    _warning Update Failed
+  }
   _queue !.unload -rs %file
   _queue !.remove %file
 }

@@ -173,6 +173,20 @@ isAdmin {
   return $false
 }
 isObj return $iif($left($1, 1) == ${ && $right($1, 1) == $}, $true, $false)
+isBotId {
+  var %id $$$(core).id
+  if ($1 == $me) return $true
+  elseif ($istok($1-, %id, 44) || $+([,$1,]) == %id || $1 == [**]) { return $true }
+  elseif ($1 == Gerty && Gerty !ison $chan) { return $true }
+  elseif ($+([,$1,]Gerty) ison #gertyDev) { return $false }
+  tokenize 44 $1-
+  var %x = 1
+  while (%x <= $0) {
+    if ($regsubex($($ $+ %x,2),/^\[(\w{2})\](?:Gerty)?$/Si,[ $+ \1 $+ ]Gerty) ison #gertyDev) { return $false }
+    inc %x
+  }
+}
+
 fingerprint {
   var %address $address($1, 3)
   var %ident $right($gettok(%address, 1, 64), -3)

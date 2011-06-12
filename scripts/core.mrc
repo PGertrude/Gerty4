@@ -41,6 +41,8 @@ alias core {
 
     :2 _CONNECT_
     if (swiftirc isin $server) {
+      noop $regex($me,/(\[.{2}\])|)/i)
+      oadd core id $iif($regml(1),$v1,[00])
       ns id $config(conn, ircpass)
       join $config(conn, channel)
     }
