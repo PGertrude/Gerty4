@@ -26,21 +26,23 @@ on *:TEXT:*:*: {
   var %command $thread
   oadd %command time $gmt
 
-  ; am I main bot in this channel/am I in a channel?
-  if (#) {
-    var %users $nick(#, 0), %i 1
-    while (%i <= %users) {
-      if (!$oisin(core.botList, $nick(#, %i)) || $$$(core.botList. $+ $me) > $$$(core.botList. $+ $nick(#, %i))) { goto cleanup }
-      inc %i
-    }
-  }
-
   ; does this command use bot tags - fix input
+  var %IdOverride $false
   if ($left($1,1) !isin !.@ && $1 != raw) {
     if ($isBotId($1)) {
       tokenize 32 $2-
+      %IdOverride = $true
     }
     else goto cleanup
+  }
+
+  ; am I main bot in this channel/am I in a channel?
+  if (# && !%IdOverride) {
+    var %users $nick(#, 0), %i 1
+    while (%i <= %users) {
+      if ($isOnBotList($nick(#, %i)) && $$$(core.botList. $+ $me) > $$$(core.botList. $+ $nick(#, %i))) { goto cleanup }
+      inc %i
+    }
   }
 
   ; is the user an admin, can he override channel settings

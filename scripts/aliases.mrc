@@ -186,6 +186,15 @@ isBotId {
     inc %x
   }
 }
+isOnBotList {
+  var %obj $$$(core.botList)
+  var %x 1
+  while (%x <= $hget(%obj, 0).item) {
+    if ($1 == $hget(%obj, %x).item) return $hget(%obj, %x).item
+    inc %x
+  }
+  return $false
+}
 
 fingerprint {
   var %address $address($1, 3)
