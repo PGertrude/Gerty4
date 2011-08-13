@@ -23,8 +23,9 @@ alias updatechans {
 // Bot Entry Point
 on *:TEXT:*:*: {
   ; create an id for this command and register object, add creation time to command!
-  var %command $thread
+  var %command $+(${, $thread, $})
   oadd %command time $gmt
+  register %command
 
   ; does this command use bot tags - fix input
   var %IdOverride $false
@@ -37,7 +38,7 @@ on *:TEXT:*:*: {
   }
 
   ; am I main bot in this channel/am I in a channel?
-  if (# && !%IdOverride) {
+  if (# && !%IdOverride && $1 != raw) {
     var %users $nick(#, 0), %i 1
     while (%i <= %users) {
       if ($isOnBotList($nick(#, %i)) && $$$(core.botList. $+ $me) > $$$(core.botList. $+ $nick(#, %i))) { goto cleanup }

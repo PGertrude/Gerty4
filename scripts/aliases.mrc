@@ -41,7 +41,8 @@ thread        return $+(a,$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9),$r(0,9
 // job handling - common to all servers!
 timerCall {
   var %time $gmt
-  if ($calc(%time % 10) == 0) { // get job from core.
+  if ($calc(%time % 10) == 0) {
+    ; get job from core.
     if ($isObj($oparse(core.jobs))) {
       if ($oshift(core.jobs)) [ [ $v1 ] ]
     }
@@ -52,6 +53,26 @@ timerCall {
       }
       inc %x
     }
+    ; clear out old commands
+    var %x 1
+    while (%x <= $hget($$$(core.objects), 0).item) {
+      var %obj $$$(core).objects[ [ $+ [ %x ] $+ ] ]
+      ; check creation time (want them to be a minute old at least)
+      if ($$$(%obj).time && $calc($gmt - $$$(%obj).time) < 60) {
+        inc %x
+        continue
+      }
+      ; remove object traces
+      if ($exists(%obj)) {
+        remove %obj
+      }
+      if ($$$(%obj)) {
+        ofree %obj
+      }
+      odel core.objects %x
+      inc %x
+    }
+    oreindex core.objects
   }
 }
 
@@ -166,6 +187,14 @@ recurseVar_dump {
     return $var_dump($1)
   }
   var_dump $1 $2 $3
+}
+register {
+  if (!$$$(core.objects)) {
+    oadd core objects 1 $1
+  }
+  else {
+    opush $$$(core.objects) $1
+  }
 }
 isAdmin {
   if ( $1 isop $dev || $1 ishop $dev ) { return $true }
