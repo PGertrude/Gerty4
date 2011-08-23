@@ -63,6 +63,22 @@ on *:TEXT:*:*: {
   }
 
   ; am I allowed to shout (chansettings)/can I shout (modes) - decide on output method
+  ; load channel settings
+  if (!$hget(#)) {
+    loadChannel #
+  }
+  var %publicSetting $$$(#).public
+  if (!%publicSetting) {
+    %publicSetting = on
+  }
+  ;trigger = $1, nick = $2, chan = $3
+  var %prefix $left($1, 1), %out
+  %out = !.msg $nick
+  if (%publicSetting == on && #) { %out = $iif(%prefix == @,!.msg #,!.notice $nick) }
+  if (%publicSetting == off) { %out = !.notice $nick }
+  if (%publicSetting == voice) { %out = $iif($nick isvoice # || $nick ishop # || $nick isop #,$iif(%prefix == @,!.msg #,!.notice $nick),!.notice $nick) }
+  if (%publicSetting == half) { %out = $iif($nick ishop # || $nick isop #,$iif(%prefix == @,!.msg #,.notice $nick),!.notice $nick) }
+  hadd $$$(%command) out %out
 
   echo -a command: $1-
   echo -a object: $$$(%command).var_dump()
