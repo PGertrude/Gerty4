@@ -60,6 +60,7 @@ on *:TEXT:*:*: {
     else {
       _warning raw Unauthorised access attempt
     }
+    return
   }
 
   ; am I allowed to shout (chansettings)/can I shout (modes) - decide on output method
@@ -71,7 +72,6 @@ on *:TEXT:*:*: {
   if (!%publicSetting) {
     %publicSetting = on
   }
-  ;trigger = $1, nick = $2, chan = $3
   var %prefix $left($1, 1), %out
   %out = !.msg $nick
   if (%publicSetting == on && #) { %out = $iif(%prefix == @,!.msg #,!.notice $nick) }
