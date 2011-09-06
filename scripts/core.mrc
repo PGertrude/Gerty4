@@ -257,6 +257,10 @@ alias ctcpcommand {
       inc %x
     }
     return
+    :PING
+    :VERSION
+    :FINGER
+    return
     :error
     _fatalError ctcpcommand $error
   }
