@@ -80,8 +80,7 @@ timerCall {
 $ {
   ; set up tracking object
   if (!$2) {
-    var %obj $thread
-    ocreate %obj
+    var %obj ${ $+ $thread $+ $}
     ocreate %obj tokens
     oadd %obj subject $1
   }
@@ -385,18 +384,26 @@ oisin {
 }
 ocreate {
   if ($0 == 1) hmake $1
-  if ($0 == 2) {
-    if ($hget($1, $2)) { return }
-    var %thread $+(${, $thread, $})
-    hadd -m $1 $2 %thread
-    hmake %thread
+  else {
+    var %table $1, %x 1, %newEntry
+    while (%x < $0) {
+      %newEntry = $($ $+ $calc(%x + 1), 2)
+      if (!$hget(%table, %newEntry)) {
+        var %thread $+(${, $thread, $})
+        hadd -m %table %newEntry %thread
+        hmake %thread
+      }
+      %table = $hget(%table, %newEntry)
+      inc %x
+    }
   }
 }
 onew_array {
   if (!$isid) {
     var %array $$$($1)
     if (!%array) {
-      _fatalError onew_array array creation attempted on non existant entry
+      ocreate $replace($1, $chr(46), $chr(32))
+      %array = $$$($1)
     }
     if ($isObj($2-)) {
       tokenize 44 $right($left($2-, -1), -1)

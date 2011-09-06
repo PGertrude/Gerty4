@@ -14,15 +14,6 @@ getSkillInfo {
 buildSkillsArray {
   if ($$$(skills.skills)) { return }
 
-  ; set up array[][]
-  ocreate skills skills
-
-  ; prepare array
-  var %x 1
-  while (%x <= 26) {
-    ocreate $$$(skills.skills) %x
-    inc %x
-  }
   ; add the skills
   onew_array skills.skills.1 ${ $_OVER_ , oa, over, total $}
   onew_array skills.skills.2 ${ $_ATTA_ , at, att $}
@@ -54,16 +45,13 @@ buildSkillsArray {
 
 buildSkillsInfoArray {
   if ($$$(skills.skillsInfo)) { return }
-  var %file $mircdirbotData\skillInfo.ini
-  ocreate skills skillInfo
-  var %x 1
+  var %file $mircdirbotData\skillInfo.ini, %x 1
   while (%x <= $ini(%file, 0)) {
     var %y 1, %array_string
     while (%y <= $ini(%file, $ini(%file, %x), 0)) {
       %array_string = %array_string $iif($len(%array_string) != 0, $chr(44)) $ini(%file, $ini(%file, %x), %y) : $readini(%file, $ini(%file, %x), $ini(%file, $ini(%file, %x), %y))
       inc %y
     }
-    ocreate $$$(skills.skillInfo) $ini(%file, %x)
     onew_array skills.skillInfo. $+ $ini(%file, %x) %array_String
     inc %x
   }
