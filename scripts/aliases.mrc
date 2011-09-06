@@ -392,6 +392,31 @@ ocreate {
     hmake %thread
   }
 }
+onew_array {
+  if (!$isid) {
+    var %array $$$($1)
+    if (!%array) {
+      _fatalError onew_array array creation attempted on non existant entry
+    }
+    if ($isObj($2-)) {
+      tokenize 44 $right($left($2-, -1), -1)
+    }
+    else {
+      tokenize 44 $2-
+    }
+    var %x 1, %assoc $false
+    if ($numtok($1, 58) == 2) %assoc = $true
+    while (%x <= $0) {
+      if (%assoc == $true) {
+        hadd -m %array $gettok($($ $+ %x, 2), 1, 58) $gettok($($ $+ %x, 2), 2-, 58)
+      }
+      else {
+        opush %array $($ $+ %x, 2)
+      }
+      inc %x
+    }
+  }
+}
 
 // databases
 db_query {
