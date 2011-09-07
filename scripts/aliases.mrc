@@ -112,11 +112,10 @@ $ {
   var %token
   while ($oshift(%obj $+ .tokens)) {
     %token = $v1
-
     if ($count(%token, $chr(40)) == $count(%token, $chr(41)) && $count(%token, $chr(91)) == 0) {
       var %steps $count(%token, $chr(40))
       if (%steps == 0) {
-        oadd %obj subject $oget($oget(%obj, subject), %token)
+        hadd %obj subject $oget($oget(%obj, subject), %token)
       }
       else {
         var %tempToken, %reg
@@ -372,6 +371,7 @@ oshift {
   oreindex %obj
   return %value
 }
+; $oisin(haystack, needle) : returns index
 oisin {
   var %obj $oparse($1)
   if (!$isObj(%obj)) return $false
@@ -405,6 +405,38 @@ onew_array {
       ocreate $replace($1, $chr(46), $chr(32))
       %array = $$$($1)
     }
+    if ($isObj($2-)) {
+      tokenize 44 $right($left($2-, -1), -1)
+    }
+    else {
+      tokenize 44 $2-
+    }
+    var %x 1, %assoc $false
+    if ($numtok($1, 58) == 2) %assoc = $true
+    while (%x <= $0) {
+      if (%assoc == $true) {
+        hadd -m %array $gettok($($ $+ %x, 2), 1, 58) $gettok($($ $+ %x, 2), 2-, 58)
+      }
+      else {
+        opush %array $($ $+ %x, 2)
+      }
+      inc %x
+    }
+  }
+}
+opush_new_array {
+  if (!$isid) {
+    var %array $$$($1)
+    if (!%array) {
+      ocreate $replace($1, $chr(46), $chr(32))
+      %array = $$$($1)
+    }
+
+    var %obj $+(${, $thread, $})
+    opush %array %obj
+    ocreate %obj
+    %array = %obj
+
     if ($isObj($2-)) {
       tokenize 44 $right($left($2-, -1), -1)
     }

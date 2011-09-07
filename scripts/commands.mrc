@@ -24,7 +24,7 @@ alias updatechans {
 on *:TEXT:*:*: {
   ; create an id for this command and register object, add creation time to command!
   var %command $+(${, $thread, $})
-  oadd %command time $gmt
+  oadd %command time $ticks
   register %command
 
   ; does this command use bot tags - fix input
@@ -78,21 +78,30 @@ on *:TEXT:*:*: {
   if (%publicSetting == off) { %out = !.notice $nick }
   if (%publicSetting == voice) { %out = $iif($nick isvoice # || $nick ishop # || $nick isop #,$iif(%prefix == @,!.msg #,!.notice $nick),!.notice $nick) }
   if (%publicSetting == half) { %out = $iif($nick ishop # || $nick isop #,$iif(%prefix == @,!.msg #,.notice $nick),!.notice $nick) }
-  hadd $$$(%command) out %out
+  hadd %command out %out
 
   echo -a command: $1-
   echo -a object: $$$(%command).var_dump()
   ; < parse command >
+  var %commandToken $right($1, -1)
+  buildSkillsArray
+  if ($$$(%commandToken).ToFullSkillName()) {
+    onew_array %command ${ RSN : $nick , skill : $v1 $}
+    noop $getSource(skillTest %command, %command, http://hiscore.runescape.com/index_lite.ws?player= $+ $$$(%command).RSN)
+  }
 
   ; non-commands - check for calculation
 
-  ; clean up after command
   :cleanup
-  if ($$$(%command)) {
-    ofree %command
-  }
   return
   :error
   _fatalError commands $error
   reseterror
+}
+
+alias skillTest {
+  var %command $1, %hiscores $2-
+  hadd %command Player $player($oparse(%command $+ .RSN), %hiscores)
+  var_dump %command
+  $oparse(%command $+ .out) $calc($ticks - $oparse(%command $+ .time))) $var_dump($oparse(%command $+ .Player. $+ $$$(%command).Skill))
 }

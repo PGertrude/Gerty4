@@ -1,50 +1,52 @@
 toFullSkillName {
   var %skill $1, %x 1
   while (%x <= $hget($$$(skills.skills), 0).item) {
-    if ($oisin($$$(skills.skills. $+ %x), %skill)) {
-      return $$$(skills.skills. $+ %x $+ .1)
+    if ($oisin($oparse(skills.skills. $+ %x), %skill)) {
+      return $oparse(skills.skills. $+ %x $+ .1)
     }
     inc %x
   }
 }
 getSkillInfo {
-  return $$$(skills.skillInfo. $+ $1)
+  buildSkillsInfoArray
+  return $oparse(skills.skillInfo. $+ $1)
 }
 
 buildSkillsArray {
-  if ($$$(skills.skills)) { return }
+  if ($oparse(skills.skills)) { return }
 
   ; add the skills
-  onew_array skills.skills.1 ${ $_OVER_ , oa, over, total $}
-  onew_array skills.skills.2 ${ $_ATTA_ , at, att $}
-  onew_array skills.skills.3 ${ $_DEFE_ , de, def, defense $}
-  onew_array skills.skills.4 ${ $_STRE_ , st, str, stre $}
-  onew_array skills.skills.5 ${ $_HITP_ , ct, hit, hitp, constitut, hitpoint $}
-  onew_array skills.skills.6 ${ $_RANG_ , ra, rang, range, ranging $}
-  onew_array skills.skills.7 ${ $_PRAY_ , pr, pray $}
-  onew_array skills.skills.8 ${ $_MAGI_ , ma, mage, magi $}
-  onew_array skills.skills.9 ${ $_COOK_ , ck, cook $}
-  onew_array skills.skills.10 ${ $_WOOD_ , wc, wood, woodcut $}
-  onew_array skills.skills.11 ${ $_FLET_ , fl, fle, fletch $}
-  onew_array skills.skills.12 ${ $_FISH_ , fi, fish $}
-  onew_array skills.skills.13 ${ $_FIRE_ , fm, fire, firemake $}
-  onew_array skills.skills.14 ${ $_CRAF_ , cr, craf, craft $}
-  onew_array skills.skills.15 ${ $_SMIT_ , sm, smit, smith $}
-  onew_array skills.skills.16 ${ $_MINI_ , mi, mine $}
-  onew_array skills.skills.17 ${ $_HERB_ , he, herb $}
-  onew_array skills.skills.18 ${ $_AGIL_ , ag, agi, agil $}
-  onew_array skills.skills.19 ${ $_THIE_ , th, thi, thief, theif, theifing, theiving $}
-  onew_array skills.skills.20 ${ $_SLAY_ , sl, slay $}
-  onew_array skills.skills.21 ${ $_FARM_ , fa, farm $}
-  onew_array skills.skills.22 ${ $_RUNE_ , rc, rune $}
-  onew_array skills.skills.23 ${ $_HUNT_ , hu, hunt, hunting $}
-  onew_array skills.skills.24 ${ $_CONS_ , con, cons, construct $}
-  onew_array skills.skills.25 ${ $_SUMM_ , su, sum, summ, summon $}
-  onew_array skills.skills.26 ${ $_DUNG_ , du, dg, dung, dungeon $}
+  opush_new_array skills.skills ${ $_OVER_ , oa, over, total $}
+  opush_new_array skills.skills ${ $_ATTA_ , at, att $}
+  opush_new_array skills.skills ${ $_DEFE_ , de, def, defense $}
+  opush_new_array skills.skills ${ $_STRE_ , st, str, stre $}
+  opush_new_array skills.skills ${ $_HITP_ , ct, hit, hitp, constitut, hitpoint $}
+  opush_new_array skills.skills ${ $_RANG_ , ra, rang, range, ranging $}
+  opush_new_array skills.skills ${ $_PRAY_ , pr, pray $}
+  opush_new_array skills.skills ${ $_MAGI_ , ma, mage, magi $}
+  opush_new_array skills.skills ${ $_COOK_ , ck, cook $}
+  opush_new_array skills.skills ${ $_WOOD_ , wc, wood, woodcut $}
+  opush_new_array skills.skills ${ $_FLET_ , fl, fle, fletch $}
+  opush_new_array skills.skills ${ $_FISH_ , fi, fish $}
+  opush_new_array skills.skills ${ $_FIRE_ , fm, fire, firemake $}
+  opush_new_array skills.skills ${ $_CRAF_ , cr, craf, craft $}
+  opush_new_array skills.skills ${ $_SMIT_ , sm, smit, smith $}
+  opush_new_array skills.skills ${ $_MINI_ , mi, mine $}
+  opush_new_array skills.skills ${ $_HERB_ , he, herb $}
+  opush_new_array skills.skills ${ $_AGIL_ , ag, agi, agil $}
+  opush_new_array skills.skills ${ $_THIE_ , th, thi, thief, theif, theifing, theiving $}
+  opush_new_array skills.skills ${ $_SLAY_ , sl, slay $}
+  opush_new_array skills.skills ${ $_FARM_ , fa, farm $}
+  opush_new_array skills.skills ${ $_RUNE_ , rc, rune $}
+  opush_new_array skills.skills ${ $_HUNT_ , hu, hunt, hunting $}
+  opush_new_array skills.skills ${ $_CONS_ , con, cons, construct $}
+  opush_new_array skills.skills ${ $_SUMM_ , su, sum, summ, summon $}
+  opush_new_array skills.skills ${ $_DUNG_ , du, dg, dung, dungeon $}
 }
 
 buildSkillsInfoArray {
-  if ($$$(skills.skillsInfo)) { return }
+  if ($oparse(skills.skillsInfo)) { return }
+
   var %file $mircdirbotData\skillInfo.ini, %x 1
   while (%x <= $ini(%file, 0)) {
     var %y 1, %array_string
